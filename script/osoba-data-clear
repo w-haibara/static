@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -eux
+
+docker rm -f test-data-cert
+docker rm -f test-data-h2o-conf
+docker rm -f test-data-www
