@@ -1,5 +1,5 @@
 # osoba
-Static site deployment manager
+Static site deployment manager.
 
 # make
 ```
