@@ -23,7 +23,7 @@ $ ./script/osoba-run
 
 # scripts path
 There are some script to make or run project in `/script`.
-If you cloned osoba in `/home/alice`, you can add this path to `$PATH` by bellow command.
+You can add this path to `$PATH` by bellow command.
 ```
-export PATH=/home/alice/osoba/script:$PATH
+export PATH=/path/to/the/osoba/script:$PATH
 ```
