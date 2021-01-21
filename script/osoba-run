@@ -9,5 +9,4 @@ docker run -itd \
   --volumes-from test-data-cert \
   --volumes-from test-data-h2o-conf \
   --volumes-from test-data-www \
-  --name osoba osoba \
-  /bin/sh -c "./osoba"
+  --name osoba osoba

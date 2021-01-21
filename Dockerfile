@@ -1,7 +1,7 @@
-FROM golang:alpine
+FROM golang:alpine AS builder
 
 USER root
-
+WORKDIR /osoba
 ENV GO111MODULE=on \
     CGO_ENABLED=0 \
     GOOS=linux \
@@ -9,10 +9,12 @@ ENV GO111MODULE=on \
 
 RUN apk add make
 
-WORKDIR /build
-
-
 COPY src ./
 RUN make test && make
 
-CMD ./osoba
+FROM scratch
+
+WORKDIR /osoba
+
+COPY --from=builder /osoba/osoba .
+CMD ["./osoba"]
