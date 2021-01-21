@@ -1,4 +1,4 @@
-FROM golang:alpine AS builder
+FROM golang:alpine AS osoba-builder
 
 USER root
 WORKDIR /osoba
@@ -16,5 +16,5 @@ FROM scratch
 
 WORKDIR /osoba
 
-COPY --from=builder /osoba/osoba .
+COPY --from=osoba-builder /osoba/osoba .
 CMD ["./osoba"]
