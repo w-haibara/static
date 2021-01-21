@@ -20,3 +20,10 @@ $ ./script/osoba-make
 ```
 $ ./script/osoba-run
 ```
+
+# scripts path
+There are some script to make or run project in `/script`.
+You can add this path to `$PATH` by this command.
+```
+export PATH=/home/docker_web/osoba/script:$PATH
+```
