@@ -1,12 +1,16 @@
 #!/bin/bash
 
-set -x
+set -eux
 
 docker rm -f osoba
-docker build -f Dockerfile ./ -t osoba
+docker build \
+  -f Dockerfile \
+  --target osoba-builder \
+  ./ -t osoba
 docker run -itd \
   -p 10003:8080 \
   --volumes-from test-data-cert \
   --volumes-from test-data-h2o-conf \
   --volumes-from test-data-www \
-  --name osoba osoba
+  --name osoba osoba \
+  /osoba/osoba

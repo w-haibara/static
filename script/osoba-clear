@@ -1,6 +1,7 @@
 #!/bin/bash
 
-set -x
+set -eux
 
 docker rm -f osoba
+docker image rm -f osoba-builder
 docker image rm -f osoba

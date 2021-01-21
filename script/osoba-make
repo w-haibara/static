@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -eux
 
 docker exec osoba-make /bin/sh -c "make "$@
 
