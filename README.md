@@ -23,7 +23,7 @@ $ ./script/osoba-run
 
 # scripts path
 There are some script to make or run project in `/script`.
-You can add this path to `$PATH` by this command.
+If you cloned osoba in `/home/alice`, you can add this path to `$PATH` by bellow command.
 ```
-export PATH=/home/docker_web/osoba/script:$PATH
+export PATH=/home/alice/osoba/script:$PATH
 ```
