@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -x
+
+docker rm -f osoba
+docker image rm -f osoba
