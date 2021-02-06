@@ -8,9 +8,10 @@ docker build \
   --target osoba-builder \
   ./ -t osoba
 docker run -itd \
-  -p 10003:8080 \
-  --volumes-from test-data-cert \
-  --volumes-from test-data-h2o-conf \
-  --volumes-from test-data-www \
+  --network proxy \
+  --volumes-from data-cert \
+  --volumes-from data-h2o-conf \
+  --volumes-from data-www \
+  --volumes-from data-jwt-secret \
   --name osoba osoba \
   /osoba/osoba
