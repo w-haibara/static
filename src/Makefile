@@ -1,5 +1,5 @@
-osoba: *.go go.mod
-	gofmt -w *.go
+osoba: *.go */*.go go.mod
+	gofmt -w *.go */*.go
 	go build -o osoba main.go
 
 .PHONY: init
