@@ -4,22 +4,17 @@ import (
 	"log"
 	"net/http"
 	"osoba/auth"
-	"osoba/logging"
 )
 
 func main() {
-	auth.Configure(auth.Config{
+	authConfig, err := auth.InitConfig(auth.Config{
 		LoginFormURI:  "/login?backTo=/osoba",
 		VerifyKeyFile: "/jwt-secret/secret.key",
 	})
+	if err != nil {
+		log.Panic(err)
+	}
 
-	mainHandler := http.HandlerFunc(mainHandler)
-
-	http.Handle("/", logging.Handler(auth.Handler(mainHandler)))
+	http.Handle("/", loggingHandler(authHandler(authConfig, http.HandlerFunc(mainHandler))))
 	http.ListenAndServe(":8080", nil)
-}
-
-func mainHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("--- main handler ---")
-	w.Write([]byte("OK"))
 }
