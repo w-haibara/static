@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"osoba/auth"
+	"osoba/webhook"
 )
 
 func loggingHandler(next http.Handler) http.Handler {
@@ -32,4 +33,31 @@ func authHandler(config auth.Config, next http.Handler) http.Handler {
 func mainHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("--- main handler ---")
 	w.Write([]byte("OK"))
+}
+
+func webhookHandler(config webhook.Config) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("--- webhook handler ---")
+		err := config.KeyVerify(w, r)
+		if err != nil {
+			log.Println("API key verify error:", err.Error())
+			http.Error(w, "Unauthorized.", http.StatusUnauthorized)
+			return
+		}
+
+		if err := config.Deploy(); err != nil {
+			log.Println("Deploy error:", err.Error())
+			http.Error(w, "Deploy failed.", http.StatusInternalServerError)
+			return
+		}
+
+		w.Write([]byte("Deploy succsess\n"))
+	})
+
+}
+
+func webhooksManage(webhooks []webhook.Config) {
+	for _, v := range webhooks {
+		http.Handle(v.Path, loggingHandler(webhookHandler(v)))
+	}
 }
