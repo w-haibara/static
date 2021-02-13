@@ -10,7 +10,7 @@ ENV GO111MODULE=on \
 RUN apk add make
 
 COPY src ./
-RUN make test && make
+RUN rm osoba; make test && make
 
 FROM scratch
 
