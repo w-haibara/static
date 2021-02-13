@@ -8,8 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 type Config struct {
@@ -36,11 +36,14 @@ func (c Config) Deploy() error {
 		return err
 	}
 
-	tmpRootDir, err := ioutil.TempDir("", "example")
+	tmpRootDir, err := ioutil.TempDir("", strings.Replace("osoba-"+c.RootPath+c.Path, string(os.PathSeparator), "", -1))
 	if err != nil {
 		return err
 	}
 	defer os.RemoveAll(tmpRootDir)
+	log.Println("tmp file dir:", tmpRootDir)
+
+	log.Println("[zip expand starting]")
 	for _, f := range zr.File {
 		if f.FileInfo().IsDir() {
 			if err = os.MkdirAll(filepath.Join(tmpRootDir, f.Name), os.ModePerm); err != nil {
@@ -51,8 +54,7 @@ func (c Config) Deploy() error {
 
 		rc, err := f.Open()
 		if err != nil {
-			log.Println("zip file open err", err)
-			panic(err)
+			return err
 		}
 		defer rc.Close()
 
@@ -60,25 +62,64 @@ func (c Config) Deploy() error {
 		io.Copy(buf, rc)
 
 		if err := ioutil.WriteFile(filepath.Join(tmpRootDir, f.Name), buf.Bytes(), 0666); err != nil {
-			panic(err)
+			return err
 		}
 	}
+	log.Println("[zip expand success]")
 
 	distPath := filepath.Join(c.RootPath, c.Path)
 	if err := os.MkdirAll(distPath, os.ModePerm); err != nil {
-		log.Println("MkdirAll err", err)
 		return err
 	}
 	os.Remove(distPath)
+	if err := os.MkdirAll(distPath, os.ModePerm); err != nil {
+		return err
+	}
 
-	/*
-		if err := os.Rename(filepath.Join(tmpRootDir, "dist"), distPath); err != nil {
+	files, err := ioutil.ReadDir(tmpRootDir)
+	if err != nil {
+		return err
+	}
+
+	parentDir := ""
+	if len(files) == 1 {
+		parentDir = files[0].Name()
+	}
+
+	log.Println("[deploy starting]")
+	if err := dirCopyAll(filepath.Join(tmpRootDir, parentDir), distPath); err != nil {
+		return err
+	}
+	log.Println("[deploy success]")
+
+	return nil
+}
+
+func dirCopyAll(src, dst string) error {
+	log.Println(src, "-->", dst)
+	files, err := ioutil.ReadDir(src)
+	if err != nil {
+		return err
+	}
+
+	for _, f := range files {
+		if f.IsDir() {
+			log.Println("dir ", string(f.Name()+"/"))
+			if err := os.MkdirAll(filepath.Join(dst, f.Name()), os.ModePerm); err != nil {
+				return err
+			}
+			dirCopyAll(filepath.Join(src, f.Name()), filepath.Join(dst, f.Name()))
+			continue
+		}
+
+		log.Println("file", f.Name())
+		b, err := ioutil.ReadFile(filepath.Join(src, f.Name()))
+		if err != nil {
 			return err
 		}
-	*/
-
-	if err := exec.Command("mv", filepath.Join(tmpRootDir, "dist"), distPath).Run(); err != nil {
-		return err
+		if err := ioutil.WriteFile(filepath.Join(dst, f.Name()), b, 0666); err != nil {
+			return err
+		}
 	}
 
 	return nil
