@@ -1,8 +1,8 @@
 package webhook
 
 import (
+	"errors"
 	"log"
-	"net/http"
 	"os"
 	"osoba/deploy"
 
@@ -11,24 +11,31 @@ import (
 
 type Config struct {
 	*deploy.Config
+	Token string
 }
 
-func InitConfigs(configs []Config) []Config {
-	return configs
+func FetchConfig(path string) (Config, error) {
+	config := Config{
+		Config: &deploy.Config{
+			Path:       "/aaa",
+			RootPath:   "/www/html",
+			ReleaseURL: "https://github.com/w-haibara/portfolio/releases/download/v1.0.8/portfolio.zip",
+		},
+		Token: os.Getenv("OSOBA_TMP_TOKEN"),
+	}
+
+	if path == config.Path {
+		return config, nil
+	}
+
+	return Config{}, errors.New("unknown error")
 }
 
-func (config Config) KeyVerify(w http.ResponseWriter, r *http.Request) error {
-	authHeader := r.Header.Get("Authorization")
-
-	if err := bcrypt.CompareHashAndPassword(getToken(config.Path), []byte(authHeader)); err != nil {
+func (config Config) KeyVerify(authHeader []byte) error {
+	if err := bcrypt.CompareHashAndPassword([]byte(config.Token), authHeader); err != nil {
 		log.Println(err)
 		return err
 	}
 
 	return nil
-}
-
-func getToken(path string) []byte {
-	// TODO: using key value store
-	return []byte(os.Getenv("OSOBA_TOKEN_" + path))
 }

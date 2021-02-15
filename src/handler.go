@@ -63,11 +63,30 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
-func webhookHandler(config webhook.Config) http.Handler {
+func webhookHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("--- webhook handler ---")
-		err := config.KeyVerify(w, r)
+
+		if err := r.ParseForm(); err != nil {
+			log.Println("[StatusBadRequest]", http.StatusBadRequest, err)
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+
+		config, err := webhook.FetchConfig(r.PostFormValue("path"))
 		if err != nil {
+			log.Println("[Internal Server Error]", http.StatusInternalServerError, err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			log.Println("[StatusUnauthorized]", http.StatusUnauthorized, "Authorization header is empty")
+			http.Error(w, "Unauthorized.", http.StatusUnauthorized)
+			return
+		}
+		if err := config.KeyVerify([]byte(authHeader)); err != nil {
 			log.Println("[StatusUnauthorized]", http.StatusUnauthorized, "API key verify error:", err.Error())
 			http.Error(w, "Unauthorized.", http.StatusUnauthorized)
 			return
@@ -82,10 +101,4 @@ func webhookHandler(config webhook.Config) http.Handler {
 		w.Write([]byte("Deploy succsess\n"))
 	})
 
-}
-
-func webhooksManage(webhooks []webhook.Config) {
-	for _, v := range webhooks {
-		http.Handle(v.Path, loggingHandler(checkMethodHandler(http.MethodPost, webhookHandler(v))))
-	}
 }
