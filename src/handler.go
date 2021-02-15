@@ -68,13 +68,13 @@ func webhookHandler(config webhook.Config) http.Handler {
 		log.Println("--- webhook handler ---")
 		err := config.KeyVerify(w, r)
 		if err != nil {
-			log.Println("API key verify error:", err.Error())
+			log.Println("[StatusUnauthorized]", http.StatusUnauthorized, "API key verify error:", err.Error())
 			http.Error(w, "Unauthorized.", http.StatusUnauthorized)
 			return
 		}
 
 		if err := config.Deploy(); err != nil {
-			log.Println("Deploy error:", err.Error())
+			log.Println("[StatusInternalServerError]", http.StatusInternalServerError, "Deploy error:", err.Error())
 			http.Error(w, "Deploy failed.", http.StatusInternalServerError)
 			return
 		}
