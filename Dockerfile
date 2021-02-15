@@ -9,6 +9,10 @@ ENV GO111MODULE=on \
 
 RUN apk add make
 
+COPY src/go.mod .
+COPY src/go.sum .
+RUN go mod download
+
 COPY src ./
 RUN rm osoba; make test && make
 
