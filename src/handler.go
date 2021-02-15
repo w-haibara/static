@@ -86,6 +86,6 @@ func webhookHandler(config webhook.Config) http.Handler {
 
 func webhooksManage(webhooks []webhook.Config) {
 	for _, v := range webhooks {
-		http.Handle(v.Path, loggingHandler(webhookHandler(v)))
+		http.Handle(v.Path, loggingHandler(checkMethodHandler(http.MethodPost, webhookHandler(v))))
 	}
 }
