@@ -36,7 +36,7 @@ func (c Config) Deploy() error {
 		return err
 	}
 
-	tmpRootDir, err := ioutil.TempDir("", strings.Replace("osoba-"+c.RootPath+c.Path, string(os.PathSeparator), "", -1))
+	tmpRootDir, err := ioutil.TempDir("", strings.Replace("osoba-"+c.RootPath+c.Path, string(os.PathSeparator), "-", -1))
 	if err != nil {
 		return err
 	}
