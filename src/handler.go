@@ -7,6 +7,34 @@ import (
 	"osoba/webhook"
 )
 
+func checkMethodHandler(method string, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("--- check method handler ---")
+
+		if r.Method != method {
+			log.Println("[StatusMethodNotAllowed]", http.StatusMethodNotAllowed, "must:", method, ", have:", r.Method)
+			http.Error(w, method+" only", http.StatusMethodNotAllowed)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func checkMethodsHandler(methods []string, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("--- check methods handler ---")
+
+		for _, method := range methods {
+			if r.Method != method {
+				log.Println("[StatusMethodNotAllowed]", http.StatusMethodNotAllowed, "must:", methods, ", have:", r.Method)
+				http.Error(w, method+" only", http.StatusMethodNotAllowed)
+				return
+			}
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func loggingHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("--- logging handler ---")

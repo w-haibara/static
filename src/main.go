@@ -17,7 +17,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	http.Handle("/", loggingHandler(authHandler(authConfig, http.HandlerFunc(mainHandler))))
+	http.Handle("/", loggingHandler(checkMethodHandler(http.MethodGet, authHandler(authConfig, http.HandlerFunc(mainHandler)))))
 
 	webhoocConfigs := webhook.InitConfigs([]webhook.Config{
 		webhook.Config{
