@@ -108,7 +108,9 @@ func dirCopyAll(src, dst string) error {
 			if err := os.MkdirAll(filepath.Join(dst, f.Name()), os.ModePerm); err != nil {
 				return err
 			}
-			dirCopyAll(filepath.Join(src, f.Name()), filepath.Join(dst, f.Name()))
+			if err := dirCopyAll(filepath.Join(src, f.Name()), filepath.Join(dst, f.Name())); err != nil {
+				return err
+			}
 			continue
 		}
 
