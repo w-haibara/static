@@ -15,7 +15,6 @@ import (
 type Config struct {
 	Path       string
 	RootPath   string
-	TmpPath    string
 	ReleaseURL string
 }
 
