@@ -9,14 +9,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Config struct {
-	*deploy.Config
+type Info struct {
+	*deploy.Info
 	Token string
 }
 
-func FetchConfig(path string) (Config, error) {
-	config := Config{
-		Config: &deploy.Config{
+func FetchInfo(path string) (Info, error) {
+	i := Info{
+		Info: &deploy.Info{
 			Path:       "/aaa",
 			RootPath:   "/www/html",
 			ReleaseURL: "https://github.com/w-haibara/portfolio/releases/download/v1.0.8/portfolio.zip",
@@ -24,15 +24,15 @@ func FetchConfig(path string) (Config, error) {
 		Token: os.Getenv("OSOBA_TMP_TOKEN"),
 	}
 
-	if path == config.Path {
-		return config, nil
+	if path == i.Path {
+		return i, nil
 	}
 
-	return Config{}, errors.New("unknown error")
+	return Info{}, errors.New("unknown error")
 }
 
-func (config Config) KeyVerify(authHeader []byte) error {
-	if err := bcrypt.CompareHashAndPassword([]byte(config.Token), authHeader); err != nil {
+func (i Info) KeyVerify(authHeader []byte) error {
+	if err := bcrypt.CompareHashAndPassword([]byte(i.Token), authHeader); err != nil {
 		log.Println(err)
 		return err
 	}

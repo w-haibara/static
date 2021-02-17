@@ -73,7 +73,7 @@ func webhookHandler() http.Handler {
 			return
 		}
 
-		config, err := webhook.FetchConfig(r.PostFormValue("path"))
+		wh, err := webhook.FetchInfo(r.PostFormValue("path"))
 		if err != nil {
 			log.Println("[Internal Server Error]", http.StatusInternalServerError, err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -86,13 +86,13 @@ func webhookHandler() http.Handler {
 			http.Error(w, "Unauthorized.", http.StatusUnauthorized)
 			return
 		}
-		if err := config.KeyVerify([]byte(authHeader)); err != nil {
+		if err := wh.KeyVerify([]byte(authHeader)); err != nil {
 			log.Println("[StatusUnauthorized]", http.StatusUnauthorized, "API key verify error:", err.Error())
 			http.Error(w, "Unauthorized.", http.StatusUnauthorized)
 			return
 		}
 
-		if err := config.Deploy(); err != nil {
+		if err := wh.Deploy(); err != nil {
 			log.Println("[StatusInternalServerError]", http.StatusInternalServerError, "Deploy error:", err.Error())
 			http.Error(w, "Deploy failed.", http.StatusInternalServerError)
 			return

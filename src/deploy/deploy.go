@@ -12,14 +12,14 @@ import (
 	"strings"
 )
 
-type Config struct {
+type Info struct {
 	Path       string
 	RootPath   string
 	ReleaseURL string
 }
 
-func (c Config) Deploy() error {
-	r, err := http.Get(c.ReleaseURL)
+func (i Info) Deploy() error {
+	r, err := http.Get(i.ReleaseURL)
 	if err != nil {
 		return err
 	}
@@ -35,7 +35,7 @@ func (c Config) Deploy() error {
 		return err
 	}
 
-	tmpRootDir, err := ioutil.TempDir("", strings.Replace("osoba-"+c.RootPath+c.Path, string(os.PathSeparator), "-", -1))
+	tmpRootDir, err := ioutil.TempDir("", strings.Replace("osoba-"+i.RootPath+i.Path, string(os.PathSeparator), "-", -1))
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func (c Config) Deploy() error {
 	}
 	log.Println("[zip expand success]")
 
-	distPath := filepath.Join(c.RootPath, c.Path)
+	distPath := filepath.Join(i.RootPath, i.Path)
 	if err := os.MkdirAll(distPath, os.ModePerm); err != nil {
 		return err
 	}
