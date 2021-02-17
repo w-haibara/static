@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"osoba/auth"
+	"osoba/deploy"
 	"osoba/webhook"
 )
 
@@ -69,7 +70,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
-func webhookHandler() http.Handler {
+func webhookHandler(chanDeployInfo chan deploy.Info) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("--- webhook handler ---")
 
@@ -98,13 +99,10 @@ func webhookHandler() http.Handler {
 			return
 		}
 
-		if err := wh.Deploy(); err != nil {
-			log.Println("[StatusInternalServerError]", http.StatusInternalServerError, "Deploy error:", err.Error())
-			http.Error(w, "Deploy failed.", http.StatusInternalServerError)
-			return
-		}
+		chanDeployInfo <- *wh.Info
 
-		w.Write([]byte("Deploy succsess\n"))
+		w.WriteHeader(http.StatusAccepted)
+		w.Write([]byte("Accepted\n"))
 	})
 
 }

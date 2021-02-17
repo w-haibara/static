@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"osoba/config"
+	"osoba/deploy"
 
 	"github.com/k0kubun/pp"
 )
@@ -16,10 +17,12 @@ func main() {
 	flag.Parse()
 
 	c := configure()
+	chanDeployInfo := make(chan deploy.Info)
 
 	http.Handle("/", loggingHandler(checkMethodHandler(http.MethodGet, authHandler(*c.Auth, http.HandlerFunc(mainHandler)))))
-	http.Handle("/deploy", loggingHandler(checkMethodHandler(http.MethodPost, webhookHandler())))
+	http.Handle("/deploy", loggingHandler(checkMethodHandler(http.MethodPost, webhookHandler(chanDeployInfo))))
 
+	go deploy.AwaitDeploy(chanDeployInfo)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 

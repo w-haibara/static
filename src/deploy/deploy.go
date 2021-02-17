@@ -18,6 +18,21 @@ type Info struct {
 	ReleaseURL string
 }
 
+func AwaitDeploy(info chan Info) {
+	for {
+		var msg string = ""
+		select {
+		case i := <-info:
+			msg += "deploy to " + string(i.Path) + ", "
+			if err := i.Deploy(); err != nil {
+				msg += "error: " + err.Error()
+			}
+			msg += "success"
+		}
+		log.Println(msg)
+	}
+}
+
 func (i Info) Deploy() error {
 	r, err := http.Get(i.ReleaseURL)
 	if err != nil {
@@ -40,9 +55,7 @@ func (i Info) Deploy() error {
 		return err
 	}
 	defer os.RemoveAll(tmpRootDir)
-	log.Println("tmp file dir:", tmpRootDir)
 
-	log.Println("[zip expand starting]")
 	for _, f := range zr.File {
 		if f.FileInfo().IsDir() {
 			if err = os.MkdirAll(filepath.Join(tmpRootDir, f.Name), os.ModePerm); err != nil {
@@ -64,7 +77,6 @@ func (i Info) Deploy() error {
 			return err
 		}
 	}
-	log.Println("[zip expand success]")
 
 	distPath := filepath.Join(i.RootPath, i.Path)
 	if err := os.MkdirAll(distPath, os.ModePerm); err != nil {
@@ -85,17 +97,14 @@ func (i Info) Deploy() error {
 		parentDir = files[0].Name()
 	}
 
-	log.Println("[deploy starting]")
 	if err := dirCopyAll(filepath.Join(tmpRootDir, parentDir), distPath); err != nil {
 		return err
 	}
-	log.Println("[deploy success]")
 
 	return nil
 }
 
 func dirCopyAll(src, dst string) error {
-	log.Println(src, "-->", dst)
 	files, err := ioutil.ReadDir(src)
 	if err != nil {
 		return err
@@ -103,7 +112,6 @@ func dirCopyAll(src, dst string) error {
 
 	for _, f := range files {
 		if f.IsDir() {
-			log.Println("dir ", string(f.Name()+"/"))
 			if err := os.MkdirAll(filepath.Join(dst, f.Name()), os.ModePerm); err != nil {
 				return err
 			}
@@ -113,7 +121,6 @@ func dirCopyAll(src, dst string) error {
 			continue
 		}
 
-		log.Println("file", f.Name())
 		b, err := ioutil.ReadFile(filepath.Join(src, f.Name()))
 		if err != nil {
 			return err
