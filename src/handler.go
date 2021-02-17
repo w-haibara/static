@@ -46,14 +46,20 @@ func loggingHandler(next http.Handler) http.Handler {
 func authHandler(config auth.Config, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("--- auth handler ---")
-		err := config.Auth(next, w, r)
+
+		app, err := auth.NewApp(config)
 		if err != nil {
-			log.Println("JWT parse error:", err.Error())
-			log.Println("redirect to login form (", config.LoginFormURI, ")")
-			http.Redirect(w, r, config.LoginFormURI, http.StatusSeeOther)
+			log.Println("NewApp error", err)
 			return
 		}
-		log.Printf("%#v\n", config.Claims)
+
+		if err := app.Auth(next, w, r); err != nil {
+			log.Println("JWT parse error:", err.Error())
+			log.Println("redirect to login form (", app.LoginFormURI, ")")
+			http.Redirect(w, r, app.LoginFormURI, http.StatusSeeOther)
+			return
+		}
+		log.Printf("%#v\n", app.Claims)
 		next.ServeHTTP(w, r)
 	})
 }

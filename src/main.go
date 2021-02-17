@@ -1,22 +1,35 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"net/http"
-	"osoba/auth"
+	"osoba/config"
+
+	"github.com/k0kubun/pp"
 )
 
 func main() {
-	authConfig, err := auth.InitConfig(auth.Config{
-		LoginFormURI:  "/login?backTo=/osoba",
-		VerifyKeyFile: "/jwt-secret/secret.key",
-	})
+	c := configure()
+
+	http.Handle("/", loggingHandler(checkMethodHandler(http.MethodGet, authHandler(*c.Auth, http.HandlerFunc(mainHandler)))))
+	http.Handle("/deploy", loggingHandler(checkMethodHandler(http.MethodPost, webhookHandler())))
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func configure() config.Config {
+	json, err := ioutil.ReadFile("config.json")
 	if err != nil {
 		log.Panic(err)
 	}
 
-	http.Handle("/", loggingHandler(checkMethodHandler(http.MethodGet, authHandler(authConfig, http.HandlerFunc(mainHandler)))))
-	http.Handle("/deploy", loggingHandler(checkMethodHandler(http.MethodPost, webhookHandler())))
+	c, err := config.Configure(json)
+	if err != nil {
+		log.Panic(err)
+	}
 
-	http.ListenAndServe(":8080", nil)
+	pp.Println("Auth:", c.Auth)
+
+	return c
 }
