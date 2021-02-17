@@ -19,8 +19,8 @@ func main() {
 	c := configure()
 	chanDeployInfo := make(chan deploy.Info)
 
-	http.Handle("/", loggingHandler(checkMethodHandler(http.MethodGet, authHandler(*c.Auth, http.HandlerFunc(mainHandler)))))
-	http.Handle("/deploy", loggingHandler(checkMethodHandler(http.MethodPost, webhookHandler(chanDeployInfo))))
+	http.Handle("/", loggingHandler(checkMethodsHandler(authHandler(*c.Auth, http.HandlerFunc(mainHandler)), http.MethodGet)))
+	http.Handle("/deploy", loggingHandler(checkMethodsHandler(webhookHandler(chanDeployInfo), http.MethodPost)))
 
 	go deploy.AwaitDeploy(chanDeployInfo)
 	log.Fatal(http.ListenAndServe(":8080", nil))

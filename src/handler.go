@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"osoba/auth"
@@ -8,31 +9,18 @@ import (
 	"osoba/webhook"
 )
 
-func checkMethodHandler(method string, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("--- check method handler ---")
-
-		if r.Method != method {
-			log.Println("[StatusMethodNotAllowed]", http.StatusMethodNotAllowed, "must:", method, ", have:", r.Method)
-			http.Error(w, method+" only", http.StatusMethodNotAllowed)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
-func checkMethodsHandler(methods []string, next http.Handler) http.Handler {
+func checkMethodsHandler(next http.Handler, methods ...string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("--- check methods handler ---")
 
 		for _, method := range methods {
-			if r.Method != method {
-				log.Println("[StatusMethodNotAllowed]", http.StatusMethodNotAllowed, "must:", methods, ", have:", r.Method)
-				http.Error(w, method+" only", http.StatusMethodNotAllowed)
+			if r.Method == method {
+				next.ServeHTTP(w, r)
 				return
 			}
 		}
-		next.ServeHTTP(w, r)
+		log.Println("[StatusMethodNotAllowed]", http.StatusMethodNotAllowed, "must:", methods, ", have:", r.Method)
+		http.Error(w, "only:"+fmt.Sprint(methods), http.StatusMethodNotAllowed)
 	})
 }
 
