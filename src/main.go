@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"osoba/config"
 	"osoba/deploy"
+	"osoba/webhook"
 
 	"github.com/k0kubun/pp"
 )
@@ -40,6 +41,8 @@ func configure() config.Config {
 	}
 
 	pp.Println("Auth:", c.Auth)
+
+	webhook.Init()
 
 	return c
 }
