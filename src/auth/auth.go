@@ -3,7 +3,6 @@ package auth
 import (
 	"errors"
 	"io/ioutil"
-	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -46,13 +45,8 @@ func NewApp(c Config) (App, error) {
 	return a, nil
 }
 
-func (a App) Auth(next http.Handler, w http.ResponseWriter, r *http.Request) error {
-	c, err := r.Cookie(a.CookieName)
-	if err != nil {
-		return err
-	}
-
-	token, err := jwt.Parse(c.Value, func(*jwt.Token) (interface{}, error) {
+func (a App) Auth(jwtToken string) error {
+	token, err := jwt.Parse(jwtToken, func(*jwt.Token) (interface{}, error) {
 		return a.verifyKey, nil
 	})
 	if err != nil {

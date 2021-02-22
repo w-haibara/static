@@ -38,11 +38,16 @@ func authHandler(config auth.Config, next http.Handler) http.Handler {
 
 		app, err := auth.NewApp(config)
 		if err != nil {
-			log.Println("NewApp error", err)
 			return
 		}
 
-		if err := app.Auth(next, w, r); err != nil {
+		c, err := r.Cookie(app.CookieName)
+		if err != nil {
+			log.Println("read cookie error", err)
+			return
+		}
+
+		if err := app.Auth(c.Value); err != nil {
 			log.Println("JWT parse error:", err.Error())
 			log.Println("redirect to login form (", app.LoginFormURI, ")")
 			http.Redirect(w, r, app.LoginFormURI, http.StatusSeeOther)
