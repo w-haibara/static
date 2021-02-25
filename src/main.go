@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"osoba/config"
 	"osoba/deploy"
+	"osoba/handler"
 
 	"github.com/k0kubun/pp"
 )
@@ -19,8 +20,8 @@ func main() {
 	c := configure()
 	chanDeployInfo := make(chan deploy.Info)
 
-	http.Handle("/", loggingHandler(checkMethodsHandler(authHandler(*c.Auth, http.HandlerFunc(mainHandler)), http.MethodGet)))
-	http.Handle("/deploy", loggingHandler(checkMethodsHandler(webhookHandler(*c.DB, chanDeployInfo), http.MethodPost)))
+	http.Handle("/", handler.Logging(handler.CheckMethods(handler.Auth(*c.Auth, http.HandlerFunc(handler.Main)), http.MethodGet)))
+	http.Handle("/deploy", handler.Logging(handler.CheckMethods(handler.Webhook(*c.DB, chanDeployInfo), http.MethodPost)))
 
 	go deploy.AwaitDeploy(chanDeployInfo)
 	log.Fatal(http.ListenAndServe(":8080", nil))

@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"osoba/webhook"
 )
 
-func checkMethodsHandler(next http.Handler, methods ...string) http.Handler {
+func CheckMethods(next http.Handler, methods ...string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("--- check methods handler ---")
 
@@ -25,7 +25,7 @@ func checkMethodsHandler(next http.Handler, methods ...string) http.Handler {
 	})
 }
 
-func loggingHandler(next http.Handler) http.Handler {
+func Logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("--- logging handler ---")
 		log.Printf("%#v\n", r)
@@ -33,7 +33,7 @@ func loggingHandler(next http.Handler) http.Handler {
 	})
 }
 
-func authHandler(config auth.Config, next http.Handler) http.Handler {
+func Auth(config auth.Config, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("--- auth handler ---")
 
@@ -59,12 +59,12 @@ func authHandler(config auth.Config, next http.Handler) http.Handler {
 	})
 }
 
-func mainHandler(w http.ResponseWriter, r *http.Request) {
+func Main(w http.ResponseWriter, r *http.Request) {
 	log.Println("--- main handler ---")
 	w.Write([]byte("OK"))
 }
 
-func webhookHandler(config resource.Config, chanDeployInfo chan deploy.Info) http.Handler {
+func Webhook(config resource.Config, chanDeployInfo chan deploy.Info) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("--- webhook handler ---")
 
