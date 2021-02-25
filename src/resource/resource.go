@@ -6,7 +6,6 @@ import (
 	"osoba/db"
 	"time"
 
-	"github.com/k0kubun/pp"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -93,8 +92,6 @@ func (c Config) Fetch(filter interface{}) ([]Document, error) {
 	if err := pathes.Read(ctx, filter, &docs); err != nil {
 		return []Document{}, err
 	}
-
-	pp.Println(docs)
 
 	return docs, nil
 }
