@@ -21,14 +21,14 @@ func main() {
 	chanDeployInfo := make(chan deploy.Info)
 
 	http.Handle("/", loggingHandler(checkMethodsHandler(authHandler(*c.Auth, http.HandlerFunc(mainHandler)), http.MethodGet)))
-	http.Handle("/deploy", loggingHandler(checkMethodsHandler(webhookHandler(chanDeployInfo), http.MethodPost)))
+	http.Handle("/deploy", loggingHandler(checkMethodsHandler(webhookHandler(*c.DB, chanDeployInfo), http.MethodPost)))
 
 	go deploy.AwaitDeploy(chanDeployInfo)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 func configure() config.Config {
-	pp.Printf("config file: %v\n", *configFile)
+	log.Printf("config file: %v\n", *configFile)
 
 	json, err := ioutil.ReadFile(*configFile)
 	if err != nil {
@@ -40,7 +40,7 @@ func configure() config.Config {
 		log.Panic(err)
 	}
 
-	pp.Println("Auth:", c.Auth)
+	pp.Println(c)
 
 	webhook.Init()
 

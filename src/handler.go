@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"osoba/auth"
 	"osoba/deploy"
+	"osoba/resource"
 	"osoba/webhook"
 )
 
@@ -63,7 +64,7 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
-func webhookHandler(chanDeployInfo chan deploy.Info) http.Handler {
+func webhookHandler(config resource.Config, chanDeployInfo chan deploy.Info) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("--- webhook handler ---")
 
@@ -73,7 +74,7 @@ func webhookHandler(chanDeployInfo chan deploy.Info) http.Handler {
 			return
 		}
 
-		wh, err := webhook.FetchInfo(r.PostFormValue("path"))
+		wh, err := webhook.FetchInfo(config, r.PostFormValue("path"))
 		if err != nil {
 			log.Println("[Internal Server Error]", http.StatusInternalServerError, err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)

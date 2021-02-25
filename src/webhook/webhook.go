@@ -6,9 +6,9 @@ import (
 	"log"
 	"osoba/db"
 	"osoba/deploy"
+	"osoba/resource"
 	"time"
 
-	"github.com/k0kubun/pp"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
@@ -66,30 +66,15 @@ func Init() {
 	if err := pathes.Read(ctx, bson.M{}, &docs); err != nil {
 		log.Panic(err)
 	}
-	pp.Println(docs)
 
 	log.Println("DB initializing success")
 }
 
-func FetchInfo(path string) (Info, error) {
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
-	client, err := db.NewClient(ctx, mongodbURI)
+func FetchInfo(c resource.Config, path string) (Info, error) {
+	docs, err := c.Fetch(bson.M{"path": path})
 	if err != nil {
 		return Info{}, err
 	}
-	defer func() {
-		if err = client.DisconnectDB(ctx); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	pathes := client.NewDB("osoba").NewCollection("pathes", Document{})
-	var docs []Document
-	if err := pathes.Read(ctx, bson.M{"path": path}, &docs); err != nil {
-		return Info{}, err
-	}
-
-	pp.Println(docs)
 
 	if len(docs) != 1 {
 		return Info{}, fmt.Errorf("docs length is invalid: '%#v'\n", docs)
