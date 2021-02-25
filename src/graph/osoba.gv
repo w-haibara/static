@@ -1,0 +1,115 @@
+digraph gocallvis {
+    label="osoba";
+    labeljust="l";
+    fontname="Arial";
+    fontsize="14";
+    rankdir="LR";
+    bgcolor="lightgray";
+    style="solid";
+    penwidth="0.5";
+    pad="0.0";
+    nodesep="0.35";
+
+    node [shape="ellipse" style="filled" fillcolor="honeydew" fontname="Verdana" penwidth="1.0" margin="0.05,0.0"];
+    edge [minlen="2"]
+
+    subgraph "cluster_focus" {
+        label="main";
+labelloc="t";
+labeljust="c";
+fontsize="18";
+bgcolor="#e6ecfa";
+        
+        "osoba.configure" [ label="configure" penwidth="0.5" tooltip="osoba.configure | defined in main.go:30\nat main.go:45: calling [(osoba/resource.Config).InitDB]\nat main.go:38: calling [osoba/config.Configure]\nat main.go:43: calling [github.com/k0kubun/pp.Println]" fillcolor="lightblue" ]
+        "osoba.main" [ fillcolor="lightblue" label="main" penwidth="0.5" tooltip="osoba.main | defined in main.go:17\nat main.go:23: calling [osoba/handler.Logging]\nat main.go:24: calling [osoba/handler.Logging]\nat main.go:24: calling [osoba/handler.Webhook]\nat main.go:23: calling [osoba/handler.Auth]\nat main.go:23: calling [osoba/handler.CheckMethods]\nat main.go:24: calling [osoba/handler.CheckMethods]\nat main.go:26: calling [osoba/deploy.AwaitDeploy]\nat main.go:20: calling [osoba.configure]" ]
+        
+        subgraph "cluster_github.com/k0kubun/pp" {
+        fontsize="16";
+style="filled";
+fillcolor="lightyellow";
+fontname="Tahoma bold";
+label="pp";
+tooltip="package: github.com/k0kubun/pp";
+penwidth="0.8";
+rank="sink";
+URL="/?f=github.com/k0kubun/pp";
+        
+        "github.com/k0kubun/pp.Println" [ penwidth="1.5" tooltip="github.com/k0kubun/pp.Println | defined in pp.go:42" fillcolor="moccasin" label="Println" ]
+        
+    }
+
+        subgraph "cluster_osoba/config" {
+        rank="sink";
+URL="/?f=osoba/config";
+penwidth="0.8";
+fontsize="16";
+style="filled";
+tooltip="package: osoba/config";
+fillcolor="lightyellow";
+fontname="Tahoma bold";
+label="config";
+        
+        "osoba/config.Configure" [ label="Configure" penwidth="1.5" tooltip="osoba/config.Configure | defined in config.go:14" fillcolor="moccasin" ]
+        
+    }
+
+        subgraph "cluster_osoba/deploy" {
+        fontsize="16";
+fillcolor="lightyellow";
+rank="sink";
+label="deploy";
+tooltip="package: osoba/deploy";
+penwidth="0.8";
+fontname="Tahoma bold";
+URL="/?f=osoba/deploy";
+style="filled";
+        
+        "osoba/deploy.AwaitDeploy" [ penwidth="1.5" tooltip="osoba/deploy.AwaitDeploy | defined in deploy.go:21" fillcolor="moccasin" label="AwaitDeploy" ]
+        
+    }
+
+        subgraph "cluster_osoba/handler" {
+        URL="/?f=osoba/handler";
+tooltip="package: osoba/handler";
+style="filled";
+fontname="Tahoma bold";
+label="handler";
+rank="sink";
+penwidth="0.8";
+fontsize="16";
+fillcolor="lightyellow";
+        
+        "osoba/handler.Auth" [ fillcolor="moccasin" label="Auth" penwidth="1.5" tooltip="osoba/handler.Auth | defined in handler.go:36" ]
+        "osoba/handler.CheckMethods" [ fillcolor="moccasin" label="CheckMethods" penwidth="1.5" tooltip="osoba/handler.CheckMethods | defined in handler.go:13" ]
+        "osoba/handler.Logging" [ fillcolor="moccasin" label="Logging" penwidth="1.5" tooltip="osoba/handler.Logging | defined in handler.go:28" ]
+        "osoba/handler.Webhook" [ fillcolor="moccasin" label="Webhook" penwidth="1.5" tooltip="osoba/handler.Webhook | defined in handler.go:67" ]
+        
+    }
+
+        subgraph "cluster_osoba/resource" {
+        fontname="Tahoma bold";
+rank="sink";
+label="resource";
+penwidth="0.8";
+fontsize="16";
+style="filled";
+fillcolor="lightyellow";
+URL="/?f=osoba/resource";
+tooltip="package: osoba/resource";
+        
+        "(osoba/resource.Config).InitDB" [ label="(Config).InitDB" penwidth="1.5" tooltip="(osoba/resource.Config).InitDB | defined in resource.go:34" fillcolor="moccasin" ]
+        
+    }
+
+    }
+
+    "osoba.configure" -> "(osoba/resource.Config).InitDB" [ color="saddlebrown" tooltip="at main.go:45: calling [(osoba/resource.Config).InitDB]" ]
+    "osoba.main" -> "osoba/handler.Logging" [ color="saddlebrown" tooltip="at main.go:23: calling [osoba/handler.Logging]\nat main.go:24: calling [osoba/handler.Logging]" ]
+    "osoba.main" -> "osoba/handler.Webhook" [ tooltip="at main.go:24: calling [osoba/handler.Webhook]" color="saddlebrown" ]
+    "osoba.main" -> "osoba/handler.Auth" [ color="saddlebrown" tooltip="at main.go:23: calling [osoba/handler.Auth]" ]
+    "osoba.main" -> "osoba/handler.CheckMethods" [ color="saddlebrown" tooltip="at main.go:23: calling [osoba/handler.CheckMethods]\nat main.go:24: calling [osoba/handler.CheckMethods]" ]
+    "osoba.main" -> "osoba/deploy.AwaitDeploy" [ arrowhead="normalnoneodot" color="saddlebrown" tooltip="at main.go:26: calling [osoba/deploy.AwaitDeploy]" ]
+    "osoba.configure" -> "osoba/config.Configure" [ tooltip="at main.go:38: calling [osoba/config.Configure]" color="saddlebrown" ]
+    "osoba.configure" -> "github.com/k0kubun/pp.Println" [ color="saddlebrown" tooltip="at main.go:43: calling [github.com/k0kubun/pp.Println]" ]
+    "osoba.main" -> "osoba.configure" [ tooltip="at main.go:20: calling [osoba.configure]" ]
+}
