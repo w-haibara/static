@@ -67,21 +67,22 @@ func Webhook(config resource.Config, chanDeployInfo chan deploy.Info) http.Handl
 		log.Println("--- webhook handler ---")
 
 		if r.Header.Get("Content-Type") != "application/json" {
+			log.Println("[StatusBadRequest]", http.StatusBadRequest)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		//To allocate slice for request body
 		length, err := strconv.Atoi(r.Header.Get("Content-Length"))
 		if err != nil {
+			log.Println("[StatusInternalServerError]", http.StatusInternalServerError, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		//Read body data to parse json
 		body := make([]byte, length)
 		length, err = r.Body.Read(body)
 		if err != nil && err != io.EOF {
+			log.Println("[StatusInternalServerError]", http.StatusInternalServerError, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -89,6 +90,7 @@ func Webhook(config resource.Config, chanDeployInfo chan deploy.Info) http.Handl
 		var jsonBody map[string]string
 		err = json.Unmarshal(body[:length], &jsonBody)
 		if err != nil {
+			log.Println("[StatusInternalServerError]", http.StatusInternalServerError, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
