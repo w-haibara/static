@@ -1,13 +1,16 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"osoba/auth"
 	"osoba/deploy"
 	"osoba/resource"
 	"osoba/webhook"
+	"strconv"
 )
 
 func CheckMethods(next http.Handler, methods ...string) http.Handler {
@@ -59,22 +62,38 @@ func Auth(config auth.Config, next http.Handler) http.Handler {
 	})
 }
 
-func Main(w http.ResponseWriter, r *http.Request) {
-	log.Println("--- main handler ---")
-	w.Write([]byte("OK"))
-}
-
 func Webhook(config resource.Config, chanDeployInfo chan deploy.Info) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("--- webhook handler ---")
 
-		if err := r.ParseForm(); err != nil {
-			log.Println("[StatusBadRequest]", http.StatusBadRequest, err)
-			http.Error(w, "Bad Request", http.StatusBadRequest)
+		if r.Header.Get("Content-Type") != "application/json" {
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		wh, err := webhook.FetchInfo(config, r.PostFormValue("path"))
+		//To allocate slice for request body
+		length, err := strconv.Atoi(r.Header.Get("Content-Length"))
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		//Read body data to parse json
+		body := make([]byte, length)
+		length, err = r.Body.Read(body)
+		if err != nil && err != io.EOF {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		var jsonBody map[string]string
+		err = json.Unmarshal(body[:length], &jsonBody)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		wh, err := webhook.FetchInfo(config, jsonBody["path"])
 		if err != nil {
 			log.Println("[Internal Server Error]", http.StatusInternalServerError, err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)

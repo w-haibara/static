@@ -20,7 +20,7 @@ func main() {
 	c := configure()
 	chanDeployInfo := make(chan deploy.Info)
 
-	http.Handle("/", handler.Logging(handler.CheckMethods(handler.Auth(*c.Auth, http.HandlerFunc(handler.Main)), http.MethodGet)))
+	http.Handle("/", handler.Logging(handler.CheckMethods(handler.Auth(*c.Auth, http.FileServer(http.Dir("page"))), http.MethodGet)))
 	http.Handle("/deploy", handler.Logging(handler.CheckMethods(handler.Webhook(*c.DB, chanDeployInfo), http.MethodPost)))
 
 	go deploy.AwaitDeploy(chanDeployInfo)

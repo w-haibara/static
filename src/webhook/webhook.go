@@ -24,7 +24,7 @@ func FetchInfo(c resource.Config, path string) (Info, error) {
 	}
 
 	if len(docs) != 1 {
-		return Info{}, fmt.Errorf("docs length is invalid: '%#v'\n", docs)
+		return Info{}, fmt.Errorf("docs length is invalid, path: %s, docs: %#v", path, docs)
 	}
 
 	doc := docs[0]
