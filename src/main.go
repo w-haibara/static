@@ -21,8 +21,8 @@ func main() {
 	chanDeployInfo := make(chan deploy.Info)
 
 	http.Handle("/", handler.Logging(handler.CheckMethods(handler.Auth(*c.Auth, http.FileServer(http.Dir("page"))), http.MethodGet)))
+	http.Handle("/api/resource", handler.Logging(handler.CheckMethods(handler.Resource(*c.DB), http.MethodGet, http.MethodPost, http.MethodDelete)))
 	http.Handle("/api/deploy", handler.Logging(handler.CheckMethods(handler.Webhook(*c.DB, chanDeployInfo), http.MethodPost)))
-
 	go deploy.AwaitDeploy(chanDeployInfo)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -41,8 +41,6 @@ func configure() config.Config {
 	}
 
 	pp.Println(c)
-
-	c.DB.InitDB()
 
 	return c
 }

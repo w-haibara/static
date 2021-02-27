@@ -132,3 +132,8 @@ func dirCopyAll(src, dst string) error {
 
 	return nil
 }
+
+func (i Info) Delete() error {
+	log.Println("rm:", filepath.Join(i.RootPath, i.Path))
+	return os.RemoveAll(filepath.Join(i.RootPath, i.Path))
+}
