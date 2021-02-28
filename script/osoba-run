@@ -8,6 +8,7 @@ docker build \
   --target osoba-builder \
   ./ -t osoba
 docker run -itd \
+  --restart=always \
   --network proxy \
   --volumes-from data-www \
   --volumes-from data-jwt-secret \
