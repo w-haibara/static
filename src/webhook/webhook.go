@@ -32,7 +32,6 @@ func FetchInfo(c resource.Config, path string) (Info, error) {
 	i := Info{
 		Info: &deploy.Info{
 			Path:       doc.Path,
-			RootPath:   doc.RootPath,
 			ReleaseURL: doc.ReleaseURL,
 		},
 		Token: doc.Token,

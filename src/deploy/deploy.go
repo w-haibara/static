@@ -14,9 +14,10 @@ import (
 
 type Info struct {
 	Path       string
-	RootPath   string
 	ReleaseURL string
 }
+
+const RootPath = "/www/html"
 
 func AwaitDeploy(info chan Info) {
 	for {
@@ -50,7 +51,7 @@ func (i Info) Deploy() error {
 		return err
 	}
 
-	tmpRootDir, err := ioutil.TempDir("", strings.Replace("osoba-"+i.RootPath+i.Path, string(os.PathSeparator), "-", -1))
+	tmpRootDir, err := ioutil.TempDir("", strings.Replace("osoba-"+RootPath+i.Path, string(os.PathSeparator), "-", -1))
 	if err != nil {
 		return err
 	}
@@ -78,7 +79,7 @@ func (i Info) Deploy() error {
 		}
 	}
 
-	distPath := filepath.Join(i.RootPath, i.Path)
+	distPath := filepath.Join(RootPath, i.Path)
 	if err := os.MkdirAll(distPath, os.ModePerm); err != nil {
 		return err
 	}
@@ -134,6 +135,6 @@ func dirCopyAll(src, dst string) error {
 }
 
 func (i Info) Delete() error {
-	log.Println("rm:", filepath.Join(i.RootPath, i.Path))
-	return os.RemoveAll(filepath.Join(i.RootPath, i.Path))
+	log.Println("rm:", filepath.Join(RootPath, i.Path))
+	return os.RemoveAll(filepath.Join(RootPath, i.Path))
 }

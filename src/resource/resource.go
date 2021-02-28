@@ -21,7 +21,6 @@ type Config struct {
 type Document struct {
 	ID         primitive.ObjectID `bson:"_id,omitempty"`
 	Path       string             `bson:"path,omitempty"`
-	RootPath   string             `bson:"rootpath,omitempty"`
 	ReleaseURL string             `bson:"releaseurl,omitempty"`
 	Token      string             `bson:"token,omitempty"`
 }
@@ -84,7 +83,6 @@ func (c Config) FetchJsonAll() ([]byte, error) {
 func DocToJsonWithoutToken(docs []Document) ([]byte, error) {
 	type document struct {
 		Path       string
-		RootPath   string
 		ReleaseURL string
 	}
 
@@ -92,7 +90,6 @@ func DocToJsonWithoutToken(docs []Document) ([]byte, error) {
 	for _, doc := range docs {
 		d = append(d, document{
 			Path:       doc.Path,
-			RootPath:   doc.RootPath,
 			ReleaseURL: doc.ReleaseURL,
 		})
 	}
@@ -122,7 +119,6 @@ func (c Config) FetchJsonAllWithoutToken() ([]byte, error) {
 func MapToDoc(m map[string]string) Document {
 	doc := Document{
 		Path:       m["path"],
-		RootPath:   m["rootpath"],
 		ReleaseURL: m["releaseurl"],
 		Token:      m["token"],
 	}
@@ -201,8 +197,7 @@ func (c Config) Delete(path string) ([]byte, error) {
 
 	// TODO to be async
 	di := deploy.Info{
-		Path:     docs[0].Path,
-		RootPath: docs[0].RootPath,
+		Path: docs[0].Path,
 	}
 	if err := di.Delete(); err != nil {
 		return nil, err

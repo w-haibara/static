@@ -1,8 +1,182 @@
 <!DOCTYPE html>
 <html>
 <head>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://unpkg.com/jquery.terminal@2.x.x/js/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/jquery.terminal@2.x.x/css/jquery.terminal.min.css"/>
+<style>
+.terminal {
+  --color: #B2EBF2;
+  --background: #212121;
+  --animation: terminal-underline;
+  --size: 1.5;
+}
+</style>
 </head>
 <body>
-<p>Hello</p>
+<script>
+$('body').terminal(function(command, term) {
+	if (command === 'deploy') {
+		var history = term.history();
+		history.disable();
+		
+		var path = "";
+		
+		term.push(function(command, term) {
+			if (command) {
+				term.set_mask(false);
+				const token = command;
+				const data = JSON.stringify({"path": path});
+				term.pause();
+				$.ajax({
+					type: "post",
+					url: "https://w-haibara.com/osoba/api/deploy",
+					data: data,
+					contentType: 'application/json',
+					dataType: "json",
+					headers: {
+						"Authorization" : token,
+					},
+					success: function(data) {
+						term.echo("[[;#8BC34A;]"+`${data}`+"]");
+						console.log(data)
+					},
+					error: function(jqXHR, textStatus, errorThrown) {
+						term.echo(jqXHR.status+" : "+jqXHR.responseText);
+					},
+					complete: function() {
+						term.resume();
+						term.pop();
+					}
+				});
+			}
+		}, {
+			prompt: 'token: '
+		});
+		term.push(function(command, term) {
+			if (command) {
+				path = command
+				term.pop();
+				this.set_mask('*')
+			}
+		}, {
+			prompt: 'path: '
+		});
+	} else if (command === "show") {
+		term.pause();
+		$.getJSON("https://w-haibara.com/osoba/api/resource")
+		.done(function(data,textStatus,jqXHR) {
+			term.echo("[[;#8BC34A;]"+`${textStatus} : ${jqXHR.status}`+"]")
+			for (var i in data) {
+				for (var v in data[i]) {
+					term.echo(`${v}: ${data[i][v]}`)
+				}
+				term.echo("")
+			}
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			term.echo(jqXHR.status+" : "+jqXHR.responseText);
+		})
+		.always(function() {
+			term.resume();
+    	});
+	} else if (command === "set") {
+		var history = term.history();
+		history.disable();
+
+		var path = "";
+		var releaseurl = "";
+
+		term.push(function(command, term) {
+			if (command) {
+				term.set_mask(false);
+				const token = command;
+				const data = JSON.stringify({"path": path, "releaseurl": releaseurl, "token": token});
+				term.pause();
+				$.ajax({
+					type: "post",
+					url: "https://w-haibara.com/osoba/api/resource",
+					data: data,
+					contentType: 'application/json',
+					dataType: "json",
+					success: function(data, textStatus, jqXHR) {
+						term.echo("[[;#8BC34A;]"+`${textStatus} : ${jqXHR.status}`+"]")
+						term.echo(data);
+						console.log(data);
+					},
+					error: function(jqXHR, textStatus, errorThrown) {
+						term.echo(jqXHR.status+" : "+jqXHR.responseText);
+					},
+					complete: function() {
+						term.resume();
+						term.pop();
+					}
+				});
+			}
+		}, {
+			prompt: 'Token: '
+		});
+		term.push(function(command, term) {
+			if (command) {
+				releaseurl = command
+				term.pop();
+			}
+		}, {
+			prompt: 'ReleaseURL: '
+		});
+		term.push(function(command, term) {
+			if (command) {
+				path = command
+				term.pop();
+			}
+		}, {
+			prompt: 'Path: '
+		});
+	} else if(command === "delete") {
+		var history = term.history();
+		history.disable();
+		
+		term.push(function(command, term) {
+			if (command) {
+				term.pause();
+				const path = command;
+				const data = JSON.stringify({"path": path});
+				$.ajax({
+					type: "DELETE",
+					url: "https://w-haibara.com/osoba/api/resource",
+					data: data,
+					contentType: 'application/json',
+					dataType: "json",
+					success: function(data) {
+						$.each(data[0], function(index, elem) {
+							console.log(index + ': ' + elem);
+							term.echo("[[;#8BC34A;]"+`${index}: ${elem}`+"]")
+						});
+					},
+					error: function(jqXHR, textStatus, errorThrown) {
+						term.echo(jqXHR.status+" : "+jqXHR.responseText);
+					},
+					complete: function() {
+						term.resume();
+						term.pop();
+					}
+				});
+			}
+		}, {
+			prompt: 'Path: '
+		});
+	} else if(command === "help") {
+		term.echo();
+	} else if(command !== "") {
+		term.echo("[[;#F44336;]command not found]");
+		//term.echo('[[;#8BC34A;]successful]');
+	}
+}, {
+	greetings: function(cb) {
+		str = "\u0020\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u0020\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u0020\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u0020\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u0020\u0020\u2588\u2588\u2588\u2588\u2588\u2557\u0020\u0020\u0020\u0020\u0020\u0020\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2557\u0020\u0020\u0020\u0020\u0020\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2557\u0020\u0020\u0020\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u000a\u2588\u2588\u2554\u2550\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255d\u2588\u2588\u2554\u2550\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u0020\u0020\u0020\u0020\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255d\u2588\u2588\u2551\u0020\u0020\u0020\u0020\u0020\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255d\u2588\u2588\u2588\u2588\u2557\u0020\u0020\u2588\u2588\u2551\u255a\u2550\u2550\u2588\u2588\u2554\u2550\u2550\u255d\u000a\u2588\u2588\u2551\u0020\u0020\u0020\u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2551\u0020\u0020\u0020\u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u0020\u0020\u0020\u0020\u2588\u2588\u2551\u0020\u0020\u0020\u0020\u0020\u2588\u2588\u2551\u0020\u0020\u0020\u0020\u0020\u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2557\u0020\u0020\u2588\u2588\u2554\u2588\u2588\u2557\u0020\u2588\u2588\u2551\u0020\u0020\u0020\u2588\u2588\u2551\u0020\u0020\u0020\u000a\u2588\u2588\u2551\u0020\u0020\u0020\u2588\u2588\u2551\u255a\u2550\u2550\u2550\u2550\u2588\u2588\u2551\u2588\u2588\u2551\u0020\u0020\u0020\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2551\u0020\u0020\u0020\u0020\u2588\u2588\u2551\u0020\u0020\u0020\u0020\u0020\u2588\u2588\u2551\u0020\u0020\u0020\u0020\u0020\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u255d\u0020\u0020\u2588\u2588\u2551\u255a\u2588\u2588\u2557\u2588\u2588\u2551\u0020\u0020\u0020\u2588\u2588\u2551\u0020\u0020\u0020\u000a\u255a\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u255a\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d\u2588\u2588\u2551\u0020\u0020\u2588\u2588\u2551\u0020\u0020\u0020\u0020\u255a\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2551\u0020\u255a\u2588\u2588\u2588\u2588\u2551\u0020\u0020\u0020\u2588\u2588\u2551\u0020\u0020\u0020\u000a\u0020\u255a\u2550\u2550\u2550\u2550\u2550\u255d\u0020\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u255d\u0020\u255a\u2550\u2550\u2550\u2550\u2550\u255d\u0020\u255a\u2550\u2550\u2550\u2550\u2550\u255d\u0020\u255a\u2550\u255d\u0020\u0020\u255a\u2550\u255d\u0020\u0020\u0020\u0020\u0020\u255a\u2550\u2550\u2550\u2550\u2550\u255d\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u255d\u255a\u2550\u255d\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u255d\u255a\u2550\u255d\u0020\u0020\u255a\u2550\u2550\u2550\u255d\u0020\u0020\u0020\u255a\u2550\u255d\u0020\u0020\u0020\u000a";
+		cb(str);
+	}
+});
+</script>
 </body>
 </html>
