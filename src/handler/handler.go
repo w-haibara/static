@@ -48,6 +48,7 @@ func Auth(config auth.Config, next http.Handler) http.Handler {
 		c, err := r.Cookie(app.CookieName)
 		if err != nil {
 			log.Println("read cookie error", err)
+			http.Redirect(w, r, app.LoginFormURI, http.StatusSeeOther)
 			return
 		}
 
