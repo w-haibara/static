@@ -9,13 +9,13 @@ import (
 	"strings"
 )
 
-func (a App) FetchAll() {
-	for k, _ := range a.Contents {
-		a.Fetch(k)
+func (a App) DeployAll() {
+	for k, _ := range a.Contents.V {
+		a.Deploy(k)
 	}
 }
 
-func (a App) Fetch(path Path) {
+func (a App) Deploy(path Path) {
 	dirName := filepath.Join(a.DocumentRoot, string(path))
 
 	// make directory
@@ -26,10 +26,12 @@ func (a App) Fetch(path Path) {
 	}
 
 	// fetch zip file
-	r, err := http.Get(string(a.Contents[path]))
+	a.Contents.Mu.Lock()
+	r, err := http.Get(string(a.Contents.V[path]))
 	if err != nil {
 		panic(err.Error())
 	}
+	a.Contents.Mu.Unlock()
 	defer r.Body.Close()
 
 	// create tmpolary directory

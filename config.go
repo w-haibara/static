@@ -37,7 +37,9 @@ func (a *App) LoadConfig() {
 		a.TmpDirContentsPrefix = c.TmpDirContentsPrefix
 	}
 
-	a.Contents = Contents{}
+	a.Contents = Contents{
+		V: map[Path]URL{},
+	}
 	for _, v := range c.Contents {
 		a.Contents.Create(string(v.Path), string(v.URL))
 	}
