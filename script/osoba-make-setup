@@ -1,9 +1,0 @@
-#!/bin/bash
-
-set -eux
-
-docker rm -f osoba-make
-docker build -f Dockerfile-dev -t osoba-make .
-docker run -itd --rm \
-  --mount type=bind,source=$(pwd)/src,target=/build \
-  --name osoba-make osoba-make

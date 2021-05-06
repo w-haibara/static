@@ -1,8 +1,0 @@
-#!/bin/bash
-
-set -eux
-
-docker create --name test-data-cert data-cert
-docker create --name test-data-h2o-conf data-h2o-conf
-docker create --name test-data-www data-www
-
