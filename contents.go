@@ -1,45 +1,63 @@
 package osoba
 
-func (c Contents) Create(path, url string) {
+import (
+	"fmt"
+)
+
+func (c Contents) Create(path, url, secret string) error {
 	c.Mu.Lock()
 	defer c.Mu.Unlock()
 
-	if _, ok := c.V[Path(path)]; ok {
-		panic("content exist: " + path)
+	if _, ok := c.V[path]; ok {
+		return fmt.Errorf("content exist: " + path)
 	}
 
-	c.V[Path(path)] = URL(url)
+	c.V[path] = Content{
+		URL:    url,
+		Secret: secret,
+	}
+
+	return nil
 }
 
-func (c Contents) Update(path, url string) {
+func (c Contents) Update(path, url, secret string) error {
 	c.Mu.Lock()
 	defer c.Mu.Unlock()
 
-	if _, ok := c.V[Path(path)]; !ok {
-		panic("content not exist: " + path)
+	if _, ok := c.V[path]; !ok {
+		return fmt.Errorf("content not exist: " + path)
 	}
 
-	c.V[Path(path)] = URL(url)
+	c.V[path] = Content{
+		URL:    url,
+		Secret: secret,
+	}
+
+	return nil
 }
 
-func (c Contents) Delete(path string) {
+func (c Contents) Delete(path string) error {
 	c.Mu.Lock()
 	defer c.Mu.Unlock()
 
-	if _, ok := c.V[Path(path)]; !ok {
-		panic("content not exist: " + path)
+	if _, ok := c.V[path]; !ok {
+		return fmt.Errorf("content not exist: " + path)
 	}
 
-	c.V[Path(path)] = URL("")
+	c.V[path] = Content{}
+
+	return nil
 }
 
-func (c Contents) DeleteDir(path string) {
+func (c Contents) DeleteDir(path string) error {
 	c.Mu.Lock()
 	defer c.Mu.Unlock()
 
-	if _, ok := c.V[Path(path)]; !ok {
-		panic("content not exist: " + path)
+	if _, ok := c.V[path]; !ok {
+		return fmt.Errorf("content not exist: " + path)
 	}
 
-	delete(c.V, Path(path))
+	delete(c.V, path)
+
+	return nil
 }

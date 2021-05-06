@@ -3,7 +3,8 @@
 	"contents": [
 		{
 			"path": "",
-			"url": "https://github.com/w-haibara/w-haibara.com/releases/download/v2.4.8/portfolio.zip"
+			"url": "https://github.com/w-haibara/w-haibara.com/releases/download/v2.4.8/portfolio.zip",
+			"secret": "$2a$10$Paz9sARSt9uD1b2ODOLEm.ddnmic5ouirpwdjs2vGFmSpiD17rYLi"
 		}
 	]
 }

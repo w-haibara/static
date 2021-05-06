@@ -9,35 +9,29 @@ import (
 	"strings"
 )
 
-func (a App) DeployAll() {
-	for k, _ := range a.Contents.V {
-		a.Deploy(k)
-	}
-}
-
-func (a App) Deploy(path Path) {
-	dirName := filepath.Join(a.DocumentRoot, string(path))
+func (a App) Deploy(path string) error {
+	dirName := filepath.Join(a.DocumentRoot, path)
 
 	// make directory
 	if _, err := os.Stat(dirName); os.IsNotExist(err) {
 		if err := os.MkdirAll(dirName, os.ModePerm); err != nil {
-			panic(err.Error())
+			return err
 		}
 	}
 
 	// fetch zip file
 	a.Contents.Mu.Lock()
-	r, err := http.Get(string(a.Contents.V[path]))
+	r, err := http.Get(a.Contents.V[path].URL)
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 	a.Contents.Mu.Unlock()
 	defer r.Body.Close()
 
 	// create tmpolary directory
-	tmpDir, err := os.MkdirTemp("", strings.Replace("osoba"+string(path), string(os.PathSeparator), "", -1))
+	tmpDir, err := os.MkdirTemp("", strings.Replace("osoba"+path, string(os.PathSeparator), "", -1))
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 	defer os.RemoveAll(tmpDir)
 
@@ -45,17 +39,19 @@ func (a App) Deploy(path Path) {
 	zipPath := filepath.Join(tmpDir, "donwload.zip")
 	f, err := os.Create(zipPath)
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 	io.Copy(f, r.Body)
 
 	// expand zip file
 	if err := a.unzip(zipPath, tmpDir); err != nil {
-		panic(err.Error())
+		return err
 	}
 
 	// copy contents from tmpolary directory to document root
 	dirCopyAll(filepath.Join(tmpDir, a.TmpDirContentsPrefix), a.DocumentRoot)
+
+	return nil
 }
 
 func (a App) unzip(source, dir string) error {
