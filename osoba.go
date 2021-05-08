@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/k0kubun/pp"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,37 +21,11 @@ type Content struct {
 }
 
 type Contents struct {
-	Mu sync.Mutex
+	Mu sync.RWMutex
 	V  map[string]Content
 }
 
-func Run() {
-	a := App{}
-	if err := a.LoadConfig(); err != nil {
-		log.Fatal("[Failed to load config]", err)
-	}
-	pp.Println(a)
-
-	chanDeployPath := make(chan string)
-
-	http.Handle("/api/deploy", a.DeployHandler(chanDeployPath))
-
-	go func() {
-		for {
-			path := <-chanDeployPath
-			log.Println("deploy starting:", path)
-			if err := a.Deploy(path); err != nil {
-				log.Println(err)
-				continue
-			}
-			log.Println("deploy complete:", path)
-		}
-	}()
-
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func (a App) DeployHandler(chanDeployPath chan string) http.Handler {
+func (a App) DeployHandler(chanDeployPath chan<- string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Query().Get("path")
 		log.Println("calling deploy handler, path:", path)
