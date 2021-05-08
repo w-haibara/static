@@ -20,12 +20,19 @@ func (a App) Deploy(path string) error {
 	}
 
 	// fetch zip file
-	a.Contents.Mu.Lock()
-	r, err := http.Get(a.Contents.V[path].URL)
-	if err != nil {
+	var r *http.Response
+	if err := func() error {
+		a.Contents.Mu.RLock()
+		defer a.Contents.Mu.RUnlock()
+		var err error
+		r, err = http.Get(a.Contents.V[path].URL)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
 		return err
 	}
-	a.Contents.Mu.Unlock()
 	defer r.Body.Close()
 
 	// create tmpolary directory
